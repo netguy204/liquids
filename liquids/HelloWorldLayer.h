@@ -6,7 +6,6 @@
 //  Copyright __MyCompanyName__ 2012. All rights reserved.
 //
 
-
 #import <GameKit/GameKit.h>
 
 // When you import this file, you import all the cocos2d classes
@@ -21,11 +20,16 @@
 #define PTM_RATIO 32
 
 // HelloWorldLayer
-@interface HelloWorldLayer : CCLayer <GKAchievementViewControllerDelegate, GKLeaderboardViewControllerDelegate>
+@interface HelloWorldLayer : CCLayer <GKAchievementViewControllerDelegate, GKLeaderboardViewControllerDelegate, UIAccelerometerDelegate>
 {
 	CCTexture2D *spriteTexture_;	// weak ref
 	b2World* world;					// strong ref
-	GLESDebugDraw *m_debugDraw;		// strong ref
+	//GLESDebugDraw *m_debugDraw;		// strong ref
+
+    ccTime leftoverTime;
+    
+    CCNode *parent;
+    NSMutableArray *effectStack;
 }
 
 // returns a CCScene that contains the HelloWorldLayer as the only child
