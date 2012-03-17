@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		871C825F151355EF00B2ECA1 /* threshhold.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 871C825E151355EF00B2ECA1 /* threshhold.fsh */; };
+		871C8261151355F700B2ECA1 /* threshhold.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 871C825E151355EF00B2ECA1 /* threshhold.fsh */; };
+		871C82631514E47B00B2ECA1 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 871C82621514E47B00B2ECA1 /* CoreImage.framework */; };
 		87222F2015101903002BF3A0 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87222F1F15101903002BF3A0 /* QuartzCore.framework */; };
 		87222F2215101903002BF3A0 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87222F2115101903002BF3A0 /* OpenGLES.framework */; };
 		87222F2415101903002BF3A0 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87222F2315101903002BF3A0 /* OpenAL.framework */; };
@@ -175,12 +178,17 @@
 		8722313715101907002BF3A0 /* HelloWorldLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8722313615101907002BF3A0 /* HelloWorldLayer.mm */; };
 		8722313A15101907002BF3A0 /* GLES-Render.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8722313915101907002BF3A0 /* GLES-Render.mm */; };
 		8722313D15101907002BF3A0 /* PhysicsSprite.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8722313C15101907002BF3A0 /* PhysicsSprite.mm */; };
-		8722313F15101907002BF3A0 /* blocks.png in Resources */ = {isa = PBXBuildFile; fileRef = 8722313E15101907002BF3A0 /* blocks.png */; };
+		8722313F15101907002BF3A0 /* blocks-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = 8722313E15101907002BF3A0 /* blocks-hd.png */; };
 		8722314C1510D689002BF3A0 /* horizontal_Blur.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 8722314B1510D689002BF3A0 /* horizontal_Blur.fsh */; };
 		8722314D1510D7D5002BF3A0 /* horizontal_Blur.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 8722314B1510D689002BF3A0 /* horizontal_Blur.fsh */; };
+		8722314F1512934B002BF3A0 /* vertical_Blur.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 8722314E1512934B002BF3A0 /* vertical_Blur.fsh */; };
+		8722315015129404002BF3A0 /* vertical_Blur.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 8722314E1512934B002BF3A0 /* vertical_Blur.fsh */; };
+		8722315415129B78002BF3A0 /* blocks.png in Resources */ = {isa = PBXBuildFile; fileRef = 8722315315129B78002BF3A0 /* blocks.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		871C825E151355EF00B2ECA1 /* threshhold.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = threshhold.fsh; sourceTree = "<group>"; };
+		871C82621514E47B00B2ECA1 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		87222F1B15101903002BF3A0 /* liquids.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = liquids.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		87222F1F15101903002BF3A0 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		87222F2115101903002BF3A0 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
@@ -533,8 +541,10 @@
 		8722313915101907002BF3A0 /* GLES-Render.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = "GLES-Render.mm"; sourceTree = "<group>"; };
 		8722313B15101907002BF3A0 /* PhysicsSprite.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PhysicsSprite.h; sourceTree = "<group>"; };
 		8722313C15101907002BF3A0 /* PhysicsSprite.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PhysicsSprite.mm; sourceTree = "<group>"; };
-		8722313E15101907002BF3A0 /* blocks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = blocks.png; path = Resources/blocks.png; sourceTree = "<group>"; };
+		8722313E15101907002BF3A0 /* blocks-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "blocks-hd.png"; path = "Resources/blocks-hd.png"; sourceTree = "<group>"; };
 		8722314B1510D689002BF3A0 /* horizontal_Blur.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = horizontal_Blur.fsh; path = Resources/horizontal_Blur.fsh; sourceTree = "<group>"; };
+		8722314E1512934B002BF3A0 /* vertical_Blur.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = vertical_Blur.fsh; sourceTree = "<group>"; };
+		8722315315129B78002BF3A0 /* blocks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = blocks.png; path = Resources/blocks.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -542,6 +552,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				871C82631514E47B00B2ECA1 /* CoreImage.framework in Frameworks */,
 				87222F2015101903002BF3A0 /* QuartzCore.framework in Frameworks */,
 				87222F2215101903002BF3A0 /* OpenGLES.framework in Frameworks */,
 				87222F2415101903002BF3A0 /* OpenAL.framework in Frameworks */,
@@ -560,6 +571,7 @@
 		87222F1015101903002BF3A0 = {
 			isa = PBXGroup;
 			children = (
+				871C82621514E47B00B2ECA1 /* CoreImage.framework */,
 				87222F3115101903002BF3A0 /* liquids */,
 				87222F1E15101903002BF3A0 /* Frameworks */,
 				87222F1C15101903002BF3A0 /* Products */,
@@ -611,7 +623,10 @@
 		87222F3215101903002BF3A0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8722315315129B78002BF3A0 /* blocks.png */,
 				8722314B1510D689002BF3A0 /* horizontal_Blur.fsh */,
+				8722314E1512934B002BF3A0 /* vertical_Blur.fsh */,
+				871C825E151355EF00B2ECA1 /* threshhold.fsh */,
 				87222F3315101903002BF3A0 /* Default.png */,
 				87222F3515101903002BF3A0 /* fps_images.png */,
 				87222F3715101903002BF3A0 /* fps_images-hd.png */,
@@ -624,7 +639,7 @@
 				87222F4515101903002BF3A0 /* Icon@2x.png */,
 				87222F4715101903002BF3A0 /* Info.plist */,
 				87222F4815101903002BF3A0 /* iTunesArtwork */,
-				8722313E15101907002BF3A0 /* blocks.png */,
+				8722313E15101907002BF3A0 /* blocks-hd.png */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1175,6 +1190,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				871C8261151355F700B2ECA1 /* threshhold.fsh in Resources */,
+				8722315015129404002BF3A0 /* vertical_Blur.fsh in Resources */,
 				8722314D1510D7D5002BF3A0 /* horizontal_Blur.fsh in Resources */,
 				87222F3415101903002BF3A0 /* Default.png in Resources */,
 				87222F3615101903002BF3A0 /* fps_images.png in Resources */,
@@ -1188,7 +1205,8 @@
 				87222F4615101903002BF3A0 /* Icon@2x.png in Resources */,
 				87222F4915101903002BF3A0 /* iTunesArtwork in Resources */,
 				8722307F15101906002BF3A0 /* ChangeLog in Resources */,
-				8722313F15101907002BF3A0 /* blocks.png in Resources */,
+				8722313F15101907002BF3A0 /* blocks-hd.png in Resources */,
+				8722315415129B78002BF3A0 /* blocks.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1347,6 +1365,8 @@
 				8722313A15101907002BF3A0 /* GLES-Render.mm in Sources */,
 				8722313D15101907002BF3A0 /* PhysicsSprite.mm in Sources */,
 				8722314C1510D689002BF3A0 /* horizontal_Blur.fsh in Sources */,
+				8722314F1512934B002BF3A0 /* vertical_Blur.fsh in Sources */,
+				871C825F151355EF00B2ECA1 /* threshhold.fsh in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1452,6 +1472,7 @@
 				8722314415101907002BF3A0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

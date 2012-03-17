@@ -46,8 +46,6 @@ enum {
 
 - (CCGLProgram*)loadProgram:(NSString*)path {
     GLchar * fragSource = (GLchar*) [[NSString stringWithContentsOfFile:[CCFileUtils fullPathFromRelativePath:path] encoding:NSUTF8StringEncoding error:nil] UTF8String];
-    
-    NSLog(@"program: %s", fragSource);
     CCGLProgram *program = [[CCGLProgram alloc] initWithVertexShaderByteArray:ccPositionTextureColor_vert fragmentShaderByteArray:fragSource];
     
     
@@ -72,11 +70,58 @@ enum {
 - (CCRenderTexture*)getHblurEffect:(CGSize)s {
     CCRenderTexture *hblur = [CCRenderTexture renderTextureWithWidth:s.width height:s.height];
     hblur.position = CGPointMake(s.width / 2, s.height / 2);
-    
-    // set up the render effect
-    
     hblur.sprite.shaderProgram = [self loadProgram:@"horizontal_Blur.fsh"];
     return hblur;
+}
+
+- (CCRenderTexture*)getVblurEffect:(CGSize)s {
+    CCRenderTexture *hblur = [CCRenderTexture renderTextureWithWidth:s.width height:s.height];
+    hblur.position = CGPointMake(s.width / 2, s.height / 2);
+    hblur.sprite.shaderProgram = [self loadProgram:@"vertical_Blur.fsh"];
+    return hblur;
+}
+
+- (CCRenderTexture*)getThreshholdEffect:(CGSize)s {
+    CCRenderTexture *hblur = [CCRenderTexture renderTextureWithWidth:s.width height:s.height];
+    hblur.position = CGPointMake(s.width / 2, s.height / 2);
+    hblur.sprite.shaderProgram = [self loadProgram:@"threshhold.fsh"];
+    return hblur;
+}
+
+- (CCTexture2D*)makeBallTexture {
+    // Build a UIImage (because CGImages seem hard to come by)
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(ballSize, ballSize), NO, 0);
+
+    CGContextRef cg = UIGraphicsGetCurrentContext();
+    [[UIColor whiteColor] setFill];
+    CGFloat center = ballSize / 2;
+    CGFloat xy = center - ballSize / 4;
+    CGFloat wh = ballSize / 2;
+    CGContextFillEllipseInRect(cg, CGRectMake(xy, xy, wh, wh));
+    UIImage *whiteCircle = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+#if 1
+    CIContext *context = [CIContext contextWithOptions:nil];
+    
+    CIImage *workingImage = [CIImage imageWithCGImage:[whiteCircle CGImage]];
+    
+    // filter it
+    CIFilter *filter = [CIFilter filterWithName:@"CIBoxBlur"];
+    [filter setDefaults];
+    [filter setValue:workingImage forKey:@"inputImage"];
+    [filter setValue:[NSNumber numberWithFloat:12.0] forKey:@"inputRadius"];
+
+    CIImage *blurredImage = [filter outputImage];
+    
+    NSArray * allFilterNames = [CIFilter filterNamesInCategories:nil];
+
+    
+    CGImageRef filteredImage = [context createCGImage:blurredImage fromRect:[blurredImage extent]];
+    return [[[CCTexture2D alloc] initWithCGImage:filteredImage resolutionType:kCCResolutionUnknown] autorelease];
+#else
+    return [[CCTexture2D alloc] initWithCGImage:[whiteCircle CGImage] resolutionType:kCCResolutionUnknown];
+#endif
 }
 
 -(id) init
@@ -88,6 +133,9 @@ enum {
 		self.isTouchEnabled = YES;
 		self.isAccelerometerEnabled = YES;
 		CGSize s = [CCDirector sharedDirector].winSize;
+        opQueue = [[NSOperationQueue alloc] init];
+        opQueue.maxConcurrentOperationCount = 1;
+        ballSize = 64;
 		leftoverTime = 0;
         
 		// init physics
@@ -99,41 +147,36 @@ enum {
 		//Set up sprite
 		
 		// Use batch node. Faster
-		parent = [CCSpriteBatchNode batchNodeWithFile:@"blocks.png" capacity:100];
+		parent = [CCSpriteBatchNode batchNodeWithTexture:[self makeBallTexture] capacity:200];
 		spriteTexture_ = [parent texture];
         
         effectStack = [[NSMutableArray alloc] init];
-
+        /*
         [effectStack addObject:[self getHblurEffect:s]];
+        [effectStack addObject:[self getVblurEffect:s]];
+        */
+        [effectStack addObject:[self getThreshholdEffect:s]];
         
         [self addChild:parent z:0];
-		//[self addChild:renderTexture z:0];
-		
-		
-		//[self addNewSpriteAtPosition:ccp(s.width/2, s.height/2)];
         
         // add a bunch of new sprites in a grid
-        //int n_wide = s.width / 64;
-        //int n_height = s.height / 64 / 2;
-        for(int ii = 0; ii < 18; ii++) {
-            for(int jj = 0; jj < 10; jj++) {
-                CGFloat posX = 32 + ii * 40;
-                CGFloat posY = 32 + jj * 40;
-                [self addNewSpriteAtPosition:CGPointMake(posX, posY)];
-            }
-        }
-		
-        /*
-		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Tap screen" fontName:@"Marker Felt" fontSize:32];
-		[self addChild:label z:0];
-		[label setColor:ccc3(0,0,255)];
-		label.position = ccp( s.width/2, s.height-50);
-		*/
+        int nBallsToFill = s.width * s.height / (16.0 * 16.0);
+        int nBalls = nBallsToFill / 4; // 1/3rd full
         
-        // register for accelerometer callbacks
-        UIAccelerometer *accelerometer = [UIAccelerometer sharedAccelerometer];
-        accelerometer.delegate = self;
-        accelerometer.updateInterval = 0.25;
+        CGFloat lastY = 16.0;
+        CGFloat initialX = 16.0;
+        CGFloat lastX = initialX;
+        
+        for(int ii = 0; ii < nBalls; ++ii) {
+            if(lastX > s.width - 16.0) {
+                lastY += 16.0;
+                lastX = initialX;
+            } else {
+                lastX += 16.0;
+            }
+            
+            [self addNewSpriteAtPosition:CGPointMake(lastX, lastY)];
+        }
         
 		[self scheduleUpdate];
 	}
@@ -141,9 +184,10 @@ enum {
 }
 
 -(void) visit {
+#if 0
     CCRenderTexture *lastTexture = nil;
     for(CCRenderTexture* texture in effectStack) {
-        [texture beginWithClear:0.0f g:0.0f b:0.0f a:1.0f ];
+        [texture beginWithClear:0.0f g:0.0f b:0.0f a:0.0f ];
         if(!lastTexture) {
             [parent visit];
         } else {
@@ -154,6 +198,9 @@ enum {
     }
 
     [lastTexture visit];
+#else
+    [parent visit];
+#endif
 }
 
 -(void) dealloc
@@ -161,12 +208,8 @@ enum {
 	delete world;
 	world = NULL;
 	
-	//delete m_debugDraw;
-	//m_debugDraw = NULL;
-    //glDeleteFramebuffers(1, &renderTarget);
-    //glDeleteFramebuffers(1, &blurTarget);
-    [UIAccelerometer sharedAccelerometer].delegate = nil;
     [effectStack release];
+    [opQueue release];
     
 	[super dealloc];
 }	
@@ -233,7 +276,7 @@ enum {
 	// Do we want to let bodies sleep?
 	world->SetAllowSleeping(true);
 	
-	world->SetContinuousPhysics(true);
+	//world->SetContinuousPhysics(true);
 	
 	//m_debugDraw = new GLESDebugDraw( PTM_RATIO );
 	//world->SetDebugDraw(m_debugDraw);
@@ -300,12 +343,9 @@ enum {
 -(void) addNewSpriteAtPosition:(CGPoint)p
 {
 	CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
-	
-	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
-	//just randomly picking one of the images
-	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
-	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
-	PhysicsSprite *sprite = [PhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 * idx,32 * idy,32,32)];						
+
+	PhysicsSprite *sprite = [PhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(0,0,ballSize,ballSize)];
+    sprite.scale = 0.5;
 	[parent addChild:sprite];
 	
 	sprite.position = ccp( p.x, p.y);
@@ -319,13 +359,15 @@ enum {
 	
 	// Define another box shape for our dynamic body.
 	b2CircleShape dynamicCircle;
-    dynamicCircle.m_radius = 0.5;
+    dynamicCircle.m_radius = 0.05;
 	
 	// Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &dynamicCircle;	
 	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 0.1f;
+	fixtureDef.friction = 0.0f;
+    fixtureDef.restitution = 0.3f;
+    
 	body->CreateFixture(&fixtureDef);
 	
 	[sprite setPhysicsBody:body];
@@ -333,23 +375,19 @@ enum {
 
 -(void) update: (ccTime) dt
 {
-	//It is recommended that a fixed time step is used with Box2D for stability
-	//of the simulation, however, we are using a variable time step here.
-	//You need to make an informed choice, the following URL is useful
-	//http://gafferongames.com/game-physics/fix-your-timestep/
-	
-	int32 velocityIterations = 3;
+	int32 velocityIterations = 1;
 	int32 positionIterations = 1;
 	
-	// Instruct the world to perform a single step of simulation. It is
-	// generally best to keep the time step and iterations fixed.
     const CGFloat timePerStep = 0.02;
     dt += leftoverTime;
     while(dt > timePerStep) {
-        world->Step(timePerStep, velocityIterations, positionIterations);
+        [opQueue addOperationWithBlock:^(void) {
+            world->Step(timePerStep, velocityIterations, positionIterations);
+        }];
         dt -= timePerStep;
     }
     leftoverTime = dt;
+    
 }
 
 - (void)ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -360,7 +398,7 @@ enum {
 		
 		location = [[CCDirector sharedDirector] convertToGL: location];
 		
-		[self addNewSpriteAtPosition: location];
+		// FIXME [self addNewSpriteAtPosition: location];
 	}
 }
 
@@ -369,7 +407,6 @@ enum {
     CGFloat ddy = -acceleration.y * 10;
     b2Vec2 gravity;
     gravity.Set(ddy, ddx);
-    NSLog(@"Gravity is %f %f", ddx, ddy);
     world->SetGravity(gravity);
 }
 
