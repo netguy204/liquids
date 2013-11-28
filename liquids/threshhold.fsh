@@ -1,7 +1,7 @@
 // Shader taken from: http://webglsamples.googlecode.com/hg/electricflower/electricflower.html
 
 #ifdef GL_ES
-precision mediump float;
+precision lowp float;
 #endif
 
 varying vec4 v_fragmentColor;
@@ -11,11 +11,16 @@ uniform sampler2D u_texture;
 
 void main() {
     vec4 sample = texture2D(u_texture, v_texCoord);
-
-    if(length(sample.a) > 0.8) {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    vec4 solid = vec4(1.0, 1.0, 1.0, 1.0);
+    vec4 background = vec4(0.0, 0.0, 0.0, 1.0);
+    float threshhold = 0.4;
+    
+    if(sample.a > threshhold) {
+        gl_FragColor = solid;
     } else {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        //float factor = (threshhold - sample.a) / threshhold;
+        //gl_FragColor = mix(solid, background, pow(factor, 120.0));
+        gl_FragColor = background;
     }
     
     //gl_FragColor = sample;

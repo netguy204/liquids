@@ -90,38 +90,56 @@ enum {
 
 - (CCTexture2D*)makeBallTexture {
     // Build a UIImage (because CGImages seem hard to come by)
-    UIGraphicsBeginImageContextWithOptions(CGSizeMake(ballSize, ballSize), NO, 0);
+    CGSize size = CGSizeMake(ballSize, ballSize);
+    UIGraphicsBeginImageContextWithOptions(size, NO, 0);
 
     CGContextRef cg = UIGraphicsGetCurrentContext();
     [[UIColor whiteColor] setFill];
+    const CGFloat sizeToSpot = 32;
+    const CGFloat spotRadius = (ballSize / sizeToSpot) / 2;
     CGFloat center = ballSize / 2;
-    CGFloat xy = center - ballSize / 4;
-    CGFloat wh = ballSize / 2;
+    CGFloat xy = center - spotRadius;
+    CGFloat wh = spotRadius * 2;
     CGContextFillEllipseInRect(cg, CGRectMake(xy, xy, wh, wh));
     UIImage *whiteCircle = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
-#if 1
-    CIContext *context = [CIContext contextWithOptions:nil];
+    const int nWeights = 21;
+    //float weight[nWeights] = {0.2270270270, 0.1945945946, 0.1216216216, 0.0540540541, 0.0162162162};
+    float weight[nWeights] = {0.125371, 0.119401, 0.103119, 0.0807016, 0.0571637, 0.0365847,
+        0.0211066, 0.0109442, 0.00508121, 0.00210257, 0.000770943,
+        0.000248691, 0.0000699444, 0.0000169562};
+    const int nLaps = 4;
+    UIImage *blurredImage;
     
-    CIImage *workingImage = [CIImage imageWithCGImage:[whiteCircle CGImage]];
+    for(int jj = 0; jj < nLaps; ++jj) {
+        // blur horizontally
+        UIGraphicsBeginImageContext(size);
+        [whiteCircle drawInRect:CGRectMake(0, 0, size.width, size.height) blendMode:    kCGBlendModePlusLighter alpha:weight[0]];
+        for (int x = 1; x < nWeights; ++x) {
+            [whiteCircle drawInRect:CGRectMake(x, 0, size.width, size.height) blendMode:kCGBlendModePlusLighter alpha:weight[x]];
+            [whiteCircle drawInRect:CGRectMake(-x, 0, size.width, size.height) blendMode:kCGBlendModePlusLighter alpha:weight[x]];
+        }
     
-    // filter it
-    CIFilter *filter = [CIFilter filterWithName:@"CIBoxBlur"];
-    [filter setDefaults];
-    [filter setValue:workingImage forKey:@"inputImage"];
-    [filter setValue:[NSNumber numberWithFloat:12.0] forKey:@"inputRadius"];
-
-    CIImage *blurredImage = [filter outputImage];
+        UIImage *horizBlurredImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
     
-    NSArray * allFilterNames = [CIFilter filterNamesInCategories:nil];
-
     
-    CGImageRef filteredImage = [context createCGImage:blurredImage fromRect:[blurredImage extent]];
-    return [[[CCTexture2D alloc] initWithCGImage:filteredImage resolutionType:kCCResolutionUnknown] autorelease];
-#else
-    return [[CCTexture2D alloc] initWithCGImage:[whiteCircle CGImage] resolutionType:kCCResolutionUnknown];
-#endif
+        // Blur vertically
+        UIGraphicsBeginImageContext(size);
+        [horizBlurredImage drawInRect:CGRectMake(0, 0, size.width, size.height) blendMode:kCGBlendModePlusLighter alpha:weight[0]];
+        for (int y = 1; y < nWeights; ++y) {
+            [horizBlurredImage drawInRect:CGRectMake(0, y, size.width, size.height) blendMode:kCGBlendModePlusLighter alpha:weight[y]];
+            [horizBlurredImage drawInRect:CGRectMake(0, -y, size.width, size.height) blendMode:kCGBlendModePlusLighter alpha:weight[y]];
+        }
+    
+        blurredImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        whiteCircle = blurredImage;
+    }
+    //
+    
+    return [[CCTexture2D alloc] initWithCGImage:[blurredImage CGImage] resolutionType:kCCResolutionUnknown];
 }
 
 -(id) init
@@ -135,7 +153,7 @@ enum {
 		CGSize s = [CCDirector sharedDirector].winSize;
         opQueue = [[NSOperationQueue alloc] init];
         opQueue.maxConcurrentOperationCount = 1;
-        ballSize = 64;
+        ballSize = 256;
 		leftoverTime = 0;
         
 		// init physics
@@ -162,6 +180,7 @@ enum {
         // add a bunch of new sprites in a grid
         int nBallsToFill = s.width * s.height / (16.0 * 16.0);
         int nBalls = nBallsToFill / 4; // 1/3rd full
+        nBalls = 200;
         
         CGFloat lastY = 16.0;
         CGFloat initialX = 16.0;
@@ -184,7 +203,7 @@ enum {
 }
 
 -(void) visit {
-#if 0
+#if 1
     CCRenderTexture *lastTexture = nil;
     for(CCRenderTexture* texture in effectStack) {
         [texture beginWithClear:0.0f g:0.0f b:0.0f a:0.0f ];
@@ -274,7 +293,7 @@ enum {
 	
 	
 	// Do we want to let bodies sleep?
-	world->SetAllowSleeping(true);
+	world->SetAllowSleeping(false);
 	
 	//world->SetContinuousPhysics(true);
 	
@@ -345,7 +364,7 @@ enum {
 	CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
 
 	PhysicsSprite *sprite = [PhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(0,0,ballSize,ballSize)];
-    sprite.scale = 0.5;
+
 	[parent addChild:sprite];
 	
 	sprite.position = ccp( p.x, p.y);
@@ -359,7 +378,7 @@ enum {
 	
 	// Define another box shape for our dynamic body.
 	b2CircleShape dynamicCircle;
-    dynamicCircle.m_radius = 0.05;
+    dynamicCircle.m_radius = 0.2;
 	
 	// Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
@@ -378,7 +397,7 @@ enum {
 	int32 velocityIterations = 1;
 	int32 positionIterations = 1;
 	
-    const CGFloat timePerStep = 0.02;
+    const CGFloat timePerStep = 0.03;
     dt += leftoverTime;
     while(dt > timePerStep) {
         [opQueue addOperationWithBlock:^(void) {
